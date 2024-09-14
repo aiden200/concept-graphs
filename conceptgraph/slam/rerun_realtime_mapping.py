@@ -185,7 +185,8 @@ def main(cfg : DictConfig):
         # Set the classes for the detection model
         detection_model.set_classes(obj_classes.get_classes_arr())
 
-        openai_client = get_openai_client()
+        # openai_client = get_openai_client() #using gpt4 for detection comment out
+        openai_client = None
         
     else:
         print("\n".join(["NOT Running detections..."] * 10))
@@ -269,7 +270,9 @@ def main(cfg : DictConfig):
             )
             
             # Make the edges
-            labels, edges, edge_image, captions = make_vlm_edges_and_captions(image, curr_det, obj_classes, detection_class_labels, det_exp_vis_path, color_path, cfg.make_edges, openai_client)
+            # this is with openai
+            # labels, edges, edge_image, captions = make_vlm_edges_and_captions(image, curr_det, obj_classes, detection_class_labels, det_exp_vis_path, color_path, cfg.make_edges, openai_client)
+            labels, edges, edge_image, captions = make_vlm_edges_and_captions(image, curr_det, obj_classes, detection_class_labels, det_exp_vis_path, color_path, False, None)
 
             image_crops, image_feats, text_feats = compute_clip_features_batched(
                 image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
@@ -314,6 +317,7 @@ def main(cfg : DictConfig):
                 save_detection_results(det_exp_pkl_path / vis_save_path.stem, results)
         else:
             # Support current and old saving formats
+            
             if os.path.exists(det_exp_pkl_path / color_path.stem):
                 raw_gobs = load_saved_detections(det_exp_pkl_path / color_path.stem)
             elif os.path.exists(det_exp_pkl_path / f"{int(color_path.stem):06}"):
